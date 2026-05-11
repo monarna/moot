@@ -5,12 +5,12 @@ A decentralized social network with tree-themed architecture, sway-weighted mode
 ## Features
 
 ### Core Concepts
-- **Roots** - Finite community boards (like 4chan boards: /g/, /v/, /a/, etc.)
-- **Branches** - Sub-boards within roots (like sub-forums)
+- **Roots** - Finite community boards (: /a\, /b\, /c\, and so on etc.)
+- **Branches** - Sub-boards within roots (like sub-forums, generals, persistent long-running threads)
 - **Leaves** - Posts/threads within branches
 - **Hollows** - Private user spaces (like personal profiles)
-- **Sway** - Reputation system based on hosting contributions
-- **Moderation** - Sway-weighted blacklisting (users with more sway have more moderation power)
+- **Sway** - Normalized reputation system based on hosting contributions with a half-life
+- **Moderation** - Sway-weighted community-run blacklisting, no powertripping Reddit mods, no corporate moderation. 
 
 ### Technical Features
 - **Tor Hidden Service** - Automatic `.onion` address via system `tor` subprocess
@@ -84,7 +84,7 @@ moot --data-dir ./data  # Custom data directory
 moot --torrc-extra "ExitNodes {us}"  # Extra Tor config
 ```
 
-## Distributing to Users (no Rust needed)
+## Distributing to Users
 
 ### Linux
 Archive `target/release/moot` as a single binary. Users just run `./moot`.
@@ -164,16 +164,10 @@ Not feasible — iOS apps can't run background processes or listen on TCP ports.
 ## Design Philosophy
 
 ### "Equal Ownership"
+- This is system for the community, driven by it, owned by it. There is no Mark Zuckerberg, there is no server, no datacenter. It is hosted by its users. 
 - Node runners are gods — hosting earns sway (reputation)
 - Browsers lurk — casual users have limited powers
-- Sway from hosting — more bandwidth/hours = more moderation power
-
-### Tree Analogy
-- Roots = Boards (like 4chan's /g/, /v/)
-- Branches = Sub-boards within roots
-- Leaves = Posts/threads
-- Hollows = Private user spaces
-- Sway = Tree sap (flows from hosting)
+- Sway from hosting/posting — more bandwidth/hours, more valuable posts = more moderation power
 
 ## License
 
