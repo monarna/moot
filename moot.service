@@ -1,0 +1,17 @@
+[Unit]
+Description=Moot Decentralized Social Network
+After=network.target tor.service
+Wants=tor.service
+
+[Service]
+Type=simple
+User=marno
+WorkingDirectory=/mnt/Data/Projects/Moot
+ExecStart=/mnt/Data/Projects/Moot/target/release/moot --data-dir /var/lib/moot
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/moot.log
+StandardError=append:/var/log/moot.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
+    <title>Moot - gather 'round the tree</title>
+    <meta name="description" content="Decentralized social network with P2P, sway-weighted moderation">
+    <link rel="manifest" href="/static/manifest.json">
+    <style>
+        * { margin:0; padding:0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #1a1a1a;
+            --text: #00ff00;
+            --accent: #8b4513;
+            --glow: #00ff00;
+            --dim: rgba(0, 255, 0, 0.2);
+            --border: currentColor;
+        }
+
+        body.theme-oak {
+            --bg: #1a1a1a; --text: #00ff00; --accent: #8b4513; --glow: #00ff00; --dim: rgba(0,255,0,0.2);
+        }
+        body.theme-aspen {
+            --bg: #ffffff; --text: #333333; --accent: #2d5a27; --glow: #2d5a27; --dim: rgba(45,90,39,0.1);
+        }
+        body.theme-birch {
+            --bg: #e8f4f8; --text: #000000; --accent: #4a3728; --glow: #4a3728; --dim: rgba(74,55,40,0.1);
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Tree Theme Definitions */
+        body.theme-banyan { 
+            --bg: #0a1a0a; --text: #00ff00; --accent: #ffcc00; --glow: #00ff00; --dim: rgba(0,255,0,0.1); 
+        }
+        body.theme-cherry-blossom { 
+            --bg: #1a0f1a; --text: #ffb7c5; --accent: #ffffff; --glow: #ffb7c5; --dim: rgba(255,183,197,0.1); 
+        }
+        body.theme-cherry { 
+            --bg: #1a0a0a; --text: #ff4444; --accent: #ffcc00; --glow: #ff4444; --dim: rgba(255,68,68,0.1); 
+        }
+        body.theme-willow { 
+            --bg: #121212; --text: #cccccc; --accent: #4fc3f7; --glow: #ffffff; --dim: rgba(204,204,204,0.1); 
+        }
+        body.theme-redwood { 
+            --bg: #2d0a0a; --text: #e64a19; --accent: #4caf50; --glow: #e64a19; --dim: rgba(230,74,25,0.1); 
+        }
+        body.theme-autumn-maple { 
+            --bg: #261105; --text: #ff9800; --accent: #d32f2f; --glow: #ff9800; --dim: rgba(255,152,0,0.1); 
+        }
+        /* Atmosphere Themes */
+        body.theme-rave { 
+            --bg: #000000; --text: #39ff14; --accent: #ff00ff; --glow: #00ffff; --dim: rgba(57,255,20,0.1); 
+        }
+        body.theme-voodoo { 
+            --bg: #1a001a; --text: #9932cc; --accent: #ff4500; --glow: #9932cc; --dim: rgba(153,50,204,0.1); 
+        }
+        body.theme-druid { 
+            --bg: #1b2621; --text: #8f9779; --accent: #c2b280; --glow: #8f9779; --dim: rgba(143,151,121,0.1); 
+        }
+        
+        .header {
+            text-align: center;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 110;
+            background: var(--bg);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            text-shadow: 0 0 10px var(--glow);
+            margin: 0 0 5px 0;
+        }
+        
+        .theme-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 12px;
+            z-index: 120;
+        }
+        
+        .theme-selector select {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 2px;
+        }
+        
+        .nav {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            text-align: center;
+            position: relative;
+            z-index: 110;
+            background: var(--bg);
+        }
+        
+        .nav a {
+            color: var(--text);
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .nav a:hover { text-decoration: underline; color: var(--accent); }
+        
+        /* Circle layout for roots */
+        .circle-container {
+            position: absolute;
+            top: 100px; /* Increased to avoid overlap */
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+        
+        .roots-circle {
+            position: relative;
+            width: min(85vw, 85vh);
+            height: min(85vw, 85vh);
+            border: 2px dashed var(--dim);
+            border-radius: 50%;
+            margin: 20px;
+        }
+        
+        .root-node {
+            position: absolute;
+            width: 120px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+            cursor: pointer;
+            background: var(--bg);
+            transition: all 0.3s;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            box-shadow: 0 0 5px var(--dim);
+            z-index: 20;
+        }
+        
+        .root-node:hover {
+            background: var(--dim);
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 100;
+            border-color: var(--accent);
+        }
+        
+        .root-designator {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+        
+        .root-name {
+            font-size: 11px;
+            opacity: 0.9;
+            line-height: 1.2;
+            word-wrap: break-word;
+        }
+        
+        /* Center area */
+        .center-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: var(--bg);
+            padding: 20px;
+            border: 1px solid var(--accent);
+            max-width: 350px;
+            z-index: 10;
+            box-shadow: 0 0 20px var(--dim);
+        }
+        
+        .center-area h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--accent);
+        }
+        
+        .mascot {
+            font-size: 48px;
+            margin: 10px 0;
+            filter: drop-shadow(0 0 10px var(--glow));
+        }
+        
+        .announcement {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+        
+        .infra-explain {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 15px;
+            text-align: left;
+            line-height: 1.3;
+        }
+        
+        .infra-explain strong {
+            color: var(--accent);
+        }
+        
+        /* Root view */
+        .root-view {
+            position: absolute;
+            top: 100px; /* Increased to avoid overlap */
+            left: 0;
+            right: 0;
+            bottom: 60px;
+            overflow-y: auto;
+            padding: 10px;
+            z-index: 10;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 10px;
+            padding: 20px 10px 80px 10px;
+        }
+        
+        /* Minimized roots at bottom */
+        .minimized-roots {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            padding: 10px;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+            flex-wrap: wrap;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .mini-root {
+            padding: 5px 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .mini-root:hover { background: var(--dim); color: var(--accent); }
+        .mini-root.active { background: var(--dim); border-color: var(--accent); color: var(--accent); }
+        
+        /* Node Graph Layout for branches */
+        .node-graph-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 180px);
+            overflow: hidden;
+            background: var(--dim);
+        }
+        
+        .branch-node {
+            position: absolute;
+            border: 1px solid var(--border);
+            padding: 10px;
+            background: var(--bg);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            z-index: 10;
+            overflow: hidden;
+        }
+        
+        .branch-node:hover {
+            background: var(--bg);
+            transform: scale(1.5) !important;
+            z-index: 100;
+            width: 300px !important;
+            height: auto !important;
+            min-height: 150px;
+            padding: 20px;
+            box-shadow: 0 0 20px var(--glow);
+            border-color: var(--accent);
+        }
+        
+        .branch-header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            width: 100%;
+            color: var(--accent);
+        }
+        
+        .branch-node:hover .branch-header {
+            font-size: 18px;
+        }
+        
+        .branch-desc {
+            font-size: 10px;
+            opacity: 0.8;
+            display: none;
+        }
+        
+        .branch-node:hover .branch-desc {
+            display: block;
+            margin-bottom: 15px;
+        }
+        
+        /* Leaves sticking off branches */
+        .leaf-preview-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .sticking-leaf {
+            position: absolute;
+            background: var(--bg);
+            border: 1px dashed var(--accent);
+            padding: 4px 8px;
+            font-size: 9px;
+            white-space: nowrap;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: auto;
+            color: var(--text);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .branch-node:hover .sticking-leaf {
+            display: none;
+        }
+        
+        /* Hierarchical Tree Reading View */
+        .tree-view {
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            overflow-y: auto;
+            height: 100%;
+        }
+        
+        #treeContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center top-level nodes */
+        }
+
+        .tree-node {
+            margin: 15px 0;
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .tree-node-content {
+            border: 1px solid var(--border);
+            padding: 15px;
+            background: var(--bg);
+            margin-bottom: 5px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        .tree-children {
+            margin-left: 40px;
+            border-left: 2px solid var(--dim);
+            padding-left: 20px;
+            display: block;
+        }
+        
+        .reply-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 2px 8px;
+            border: 1px dashed var(--accent);
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--accent);
+        }
+        
+        .reply-btn:hover {
+            background: var(--dim);
+            border-style: solid;
+        }
+
+        .tree-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+            border-bottom: 1px dotted var(--accent);
+            padding-bottom: 4px;
+        }
+
+        .tree-header strong {
+            color: var(--accent);
+        }
+
+        /* Reading View Layout */
+        .reading-view-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+        }
+
+        .reading-view-header h2 { font-size: 28px; color: var(--accent); }
+        .reading-view-header p { font-size: 14px; opacity: 0.8; }
+        
+        /* Compact forms */
+        .compact-form {
+            border: 1px dashed var(--accent);
+            padding: 10px;
+            margin: 10px 0;
+            background: var(--dim);
+            display: none;
+        }
+        
+        .compact-form.show { display: block; }
+        
+        .compact-form input,
+        .compact-form textarea {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 5px;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 5px 0;
+            box-sizing: border-box;
+        }
+        
+        .compact-form textarea { min-height: 60px; resize: vertical; }
+        
+        .btn {
+            background: var(--dim);
+            color: var(--text);
+            border: 1px solid var(--accent);
+            padding: 8px 12px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            width: 100%;
+            margin-top: 5px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover { background: var(--accent); color: var(--bg); font-weight: bold; }
+        
+        .toggle-btn {
+            background: none;
+            color: var(--accent);
+            border: 1px dashed var(--accent);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        
+        .status {
+            border: 1px solid var(--accent);
+            padding: 10px;
+            margin: 10px 0;
+            background: var(--dim);
+            font-size: 12px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: var(--accent);
+        }
+        
+        .countdown-timer { font-size: 11px; display: inline-block; margin-left: 8px; }
+        .countdown-warning { color: #ff6600; font-weight: bold; }
+        .countdown-expired { color: #ff0000; }
+        .legendary-btn { cursor: pointer; margin-left: 8px; opacity: 0.7; font-size: 12px; }
+        .legendary-btn:hover { opacity: 1; color: var(--accent); }
+        .legendary-active { color: #ffd700 !important; opacity: 1 !important; }
+        .config-panel { max-width: 500px; margin: 20px auto; padding: 15px; border: 1px solid var(--border); }
+        .config-panel label { display: block; margin: 10px 0 5px; font-size: 12px; }
+        .config-panel input, .config-panel select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 5px; font-family: 'Courier New', monospace; font-size: 13px; }
+        .cache-warning { border: 1px solid #ff6600; background: rgba(255,102,0,0.1); padding: 10px; margin: 10px 0; font-size: 12px; }
+        .leaf-actions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 10px; font-size: 12px; }
+        .hollow-bio { font-size: 13px; opacity: 0.8; margin: 10px 0; padding: 10px; border-left: 2px solid var(--accent); }
+        .hollow-player { margin: 10px 0; padding: 10px; border: 1px solid var(--border); }
+        .hollow-player audio { width: 100%; }
+        .hollow-embed { margin: 10px 0; padding: 10px; border: 1px solid var(--border); }
+        .hollow-embed iframe { width: 100%; max-height: 400px; border: none; }
+        .hollow-html-box { margin: 10px 0; border: 1px solid var(--border); }
+        .hollow-html-box iframe { width: 100%; min-height: 200px; border: none; background: #fff; }
+        .friend-chip { display: inline-block; padding: 3px 8px; margin: 3px; border: 1px solid var(--border); font-size: 11px; cursor: pointer; }
+        .friend-chip:hover { background: var(--dim); color: var(--accent); }
+        .settings-section { margin: 15px 0; padding: 10px; border: 1px dashed var(--border); }
+        .settings-section summary { cursor: pointer; font-weight: bold; color: var(--accent); font-size: 13px; }
+        .settings-section input, .settings-section textarea, .settings-section select { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); padding: 5px; font-family: 'Courier New', monospace; font-size: 13px; margin: 5px 0; box-sizing: border-box; }
+        .settings-section label { display: block; margin: 8px 0; font-size: 12px; }
+        .hollow-comment { padding: 8px; margin: 5px 0; border: 1px solid var(--border); font-size: 12px; word-break: break-word; }
+        .hollow-comment .meta { opacity: 0.6; font-size: 11px; margin-bottom: 4px; }
+        .hollow-comment .del-btn { float: right; opacity: 0.4; cursor: pointer; font-size: 11px; }
+        .hollow-comment .del-btn:hover { opacity: 1; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        @media (max-width: 600px) {
+            .root-node { width: 100px; padding: 8px; font-size: 11px; }
+            .root-designator { font-size: 14px; }
+            .root-name { font-size: 10px; }
+            .center-area { max-width: 250px; padding: 15px; }
+            .mascot { font-size: 32px; }
+            .infra-explain { font-size: 10px; }
+        }
+    </style>
+</head>
+<body class="theme-banyan">
+    <div class="header">
+        <h1>🌲 Moot</h1>
+        <div class="theme-selector">
+            <select id="themeSelect" onchange="changeTheme()">
+                <option value="banyan">Banyan (Lush Green)</option>
+                <option value="cherry-blossom">Cherry Blossom (Pink)</option>
+                <option value="cherry">Cherry (Deep Red)</option>
+                <option value="willow">Willow (Silver/Gray)</option>
+                <option value="redwood">Redwood (Mahogany)</option>
+                <option value="autumn-maple">Autumn Maple (Orange)</option>
+                <option value="oak">Oak (Dark/Green)</option>
+                <option value="birch">Birch (Light/Blue)</option>
+                <option value="aspen">Aspen (White/Gray)</option>
+                <option value="rave">Rave (Neon/Cyber)</option>
+                <option value="voodoo">Voodoo (Ritual/Magic)</option>
+                <option value="druid">Druid (Moss/Ancient)</option>
+            </select>
+
+        </div>
+    </div>
+    
+    <div class="nav">
+        <a href="#" onclick="showRoots()">[Roots]</a>
+        <a href="#" onclick="showHollow()">[My Hollow]</a>
+        <a href="#" onclick="showSway()">[Sway]</a>
+        <a href="#" onclick="showNodeConfig()">[Config]</a>
+        <span style="margin:0 10px;">|</span>
+        <input type="text" id="searchInput" placeholder="Search..." style="background:var(--bg);color:var(--text);border:1px solid var(--border);font-family:'Courier New',monospace;font-size:12px;padding:2px 5px;width:150px;" onkeydown="if(event.key==='Enter')searchContent()">
+        <a href="#" onclick="searchContent()" style="font-size:12px;">[Search]</a>
+        <span style="float:right;">Your address: <span id="userAddress"></span></span>
+    </div>
+    
+    <div class="circle-container" id="circleContainer">
+        <div class="roots-circle" id="rootsCircle"></div>
+        <div class="center-area" id="centerArea">
+            <div class="mascot">🌲</div>
+            <h2>gather 'round</h2>
+            <div class="announcement" id="announcement"></div>
+            <div class="infra-explain">
+                <p><strong>Infrastructure:</strong></p>
+                <p>• <strong>Blockchain</strong>: Posts stored in distributed ledger</p>
+                <p>• <strong>Nodes</strong>: Run a node to host & gain Sway</p>
+                <p>• <strong>Garlic Routing</strong>: Anonymous posting without VPN</p>
+                <p>• <strong>Serverless</strong>: No single point of failure</p>
+                <p>• <strong>Anti-Censorship</strong>: Impervious to corporate/gov actors</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="root-view" id="rootView" style="display:none;"></div>
+    
+    <script>
+        const API = 'http://127.0.0.1:8080/api';
+        let currentUser = localStorage.getItem('moot_address') || '';
+        let currentTheme = localStorage.getItem('moot_theme') || 'banyan';
+        let allRoots = [];
+        
+        // Initialize
+        document.body.className = 'theme-' + currentTheme;
+        document.getElementById('themeSelect').value = currentTheme;
+        
+        if (!currentUser) {
+            generateIdentity();
+        } else {
+            document.getElementById('userAddress').textContent = currentUser.substring(0, 10) + '...';
+        }
+        
+        showRoots();
+        
+        // WebSocket connection for real-time P2P updates
+        let wsConnected = false;
+        let wsRefreshTimer = null;
+        function connectWebSocket() {
+            const wsUrl = 'ws://127.0.0.1:8080/api/p2p/ws';
+            const ws = new WebSocket(wsUrl);
+            ws.onopen = function() {
+                wsConnected = true;
+                console.log('🔌 WebSocket connected for real-time P2P');
+            };
+            ws.onmessage = function(e) {
+                try { const msg = JSON.parse(e.data);
+                    console.log('📡 P2P update:', msg);
+                    // Auto-refresh current view (debounced to avoid spam)
+                    if (wsRefreshTimer) clearTimeout(wsRefreshTimer);
+                    wsRefreshTimer = setTimeout(function() {
+                        const rootView = document.getElementById('rootView');
+                        const circleContainer = document.getElementById('circleContainer');
+                        if (rootView.style.display !== 'none' && rootView.innerHTML.length > 0) {
+                            // Check which view is active and refresh
+                            const currentView = document.querySelector('.tree-view');
+                            if (currentView) {
+                                // On a reading view, just note the update silently
+                                // Full refresh would be disruptive during reading
+                            } else if (document.querySelector('.config-panel')) {
+                                // On config page, could refresh but don't
+                            }
+                        }
+                    }, 2000);
+                } catch(e) {}
+            };
+            ws.onclose = function() {
+                wsConnected = false;
+                console.log('🔌 WebSocket disconnected, reconnecting in 5s...');
+                setTimeout(connectWebSocket, 5000);
+            };
+            ws.onerror = function() {
+                console.log('🔌 WebSocket error');
+            };
+        }
+        // Delay WS connection to let page settle
+        setTimeout(connectWebSocket, 1000);
+        
+        function generateIdentity() {
+            let hex = '';
+            for (let i = 0; i < 40; i++) {
+                hex += Math.floor(Math.random() * 16).toString(16);
+            }
+            currentUser = '0x' + hex;
+            localStorage.setItem('moot_address', currentUser);
+            document.getElementById('userAddress').textContent = currentUser.substring(0, 10) + '...';
+            alert('Your address: ' + currentUser);
+        }
+        
+        function changeTheme() {
+            currentTheme = document.getElementById('themeSelect').value;
+            document.body.className = 'theme-' + currentTheme;
+            localStorage.setItem('moot_theme', currentTheme);
+        }
+        
+        function showRoots() {
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'flex';
+            rootView.style.display = 'none';
+            
+            fetch(`${API}/roots`)
+                .then(r => r.json())
+                .then(roots => {
+                    allRoots = roots;
+                    const circle = document.getElementById('rootsCircle');
+                    circle.innerHTML = '';
+                    
+                    // Position roots in a circle
+                    const total = roots.length;
+                    const radius = 45; // % of container size
+                    
+                    roots.forEach((root, index) => {
+                        const angle = (index / total) * 2 * Math.PI - Math.PI / 2; // Start from top
+                        const x = 50 + radius * Math.cos(angle);
+                        const y = 50 + radius * Math.sin(angle);
+                        
+                        const div = document.createElement('div');
+                        div.className = 'root-node';
+                        div.style.left = x + '%';
+                        div.style.top = y + '%';
+                        div.onclick = () => showRoot(root.id);
+                        div.innerHTML = `
+                            <div class="root-designator">${root.designator}</div>
+                            <div class="root-name">${root.name}</div>
+                        `;
+                        circle.appendChild(div);
+                    });
+                    
+                    // Random announcement
+                    const announcements = [
+                        "Moot: Where trees grow and ideas flow",
+                        "Node runners are gods!",
+                        "Equal ownership, decentralized future",
+                        "gather 'round the tree",
+                        "Sway: Your reputation grows with hosting"
+                    ];
+                    document.getElementById('announcement').textContent = 
+                        announcements[Math.floor(Math.random() * announcements.length)];
+                });
+        }
+        
+        function showRoot(rootId, selectedTrunkId) {
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'none';
+            rootView.style.display = 'block';
+            rootView.innerHTML = '<div class="loading">Loading...</div>';
+            
+            let miniHtml = '<div class="minimized-roots">';
+            allRoots.forEach(root => {
+                const active = root.id === rootId ? 'active' : '';
+                miniHtml += `<div class="mini-root ${active}" onclick="showRoot('${root.id}')">${root.designator}</div>`;
+            });
+            miniHtml += '</div>';
+            
+            Promise.all([
+                fetch(`${API}/branches/${rootId}`).then(r => r.json()),
+                fetch(`${API}/trunks/${rootId}`).then(r => r.json()),
+                fetch(`${API}/leaves/${rootId}`).then(r => r.json())
+            ]).then(([branches, trunks, leaves]) => {
+                const branchMap = {};
+                branches.forEach(b => branchMap[b.id] = { ...b, leaves: [] });
+                leaves.forEach(l => {
+                    if (branchMap[l.branch]) {
+                        branchMap[l.branch].leaves.push(l);
+                    }
+                });
+                
+                // Determine active trunk
+                if (!selectedTrunkId && trunks.length) selectedTrunkId = trunks[0].id;
+                const activeTrunk = trunks.find(t => t.id === selectedTrunkId);
+                
+                // Filter branches by trunk
+                const filteredBranches = selectedTrunkId
+                    ? branches.filter(b => b.trunk_id === selectedTrunkId)
+                    : branches;
+                
+                const root = allRoots.find(r => r.id === rootId);
+                let html = `
+                    <div style="padding: 10px; display: flex; flex-direction: column; align-items: center; border-bottom: 1px solid currentColor; margin-bottom: 10px;">
+                        <h2 style="font-size: 24px; margin-bottom: 5px;">Root: ${root.designator} ${root.name}</h2>
+                        <p style="font-style: italic; opacity: 0.8;">${root.description}</p>
+                `;
+                
+                // Trunk tabs
+                if (trunks.length) {
+                    html += '<div style="display:flex;gap:5px;flex-wrap:wrap;margin:8px 0;justify-content:center;">';
+                    trunks.forEach(t => {
+                        const active = t.id === selectedTrunkId ? 'background:var(--accent);color:var(--bg);font-weight:bold;' : '';
+                        html += `<span onclick="showRoot('${rootId}','${t.id}')" style="cursor:pointer;padding:3px 10px;border:1px solid var(--border);font-size:12px;${active}">${t.name}</span>`;
+                    });
+                    html += '</div>';
+                }
+                
+                html += `
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;">
+                            <button class="toggle-btn" onclick="toggleForm('branchForm')">[+ New Branch]</button>
+                            <button class="toggle-btn" onclick="toggleForm('trunkForm')">[+ New Trunk]</button>
+                        </div>
+                    </div>
+                    <div class="compact-form" id="trunkForm" style="max-width: 400px; margin: 5px auto;">
+                        <input type="text" id="trunkName" placeholder="Trunk Name (e.g. Hardware, AI)">
+                        <textarea id="trunkDesc" rows="2" placeholder="Description"></textarea>
+                        <button class="btn" onclick="createTrunk('${rootId}')">Create Trunk</button>
+                    </div>
+                    <div class="compact-form" id="branchForm" style="max-width: 400px; margin: 5px auto;">
+                        <input type="text" id="branchName" placeholder="Branch Name">
+                        <textarea id="branchDesc" rows="2" placeholder="Description"></textarea>
+                        <select id="branchTrunkSelect" style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px;font-family:'Courier New',monospace;margin:5px 0;">
+                            ${trunks.map(t => `<option value="${t.id}" ${t.id === selectedTrunkId ? 'selected' : ''}>${t.name}</option>`).join('')}
+                        </select>
+                        <button class="btn" onclick="createBranch('${rootId}')">Plant Branch</button>
+                    </div>
+                    <div class="node-graph-container" id="nodeGraph"></div>
+                `;
+                
+                rootView.innerHTML = html + miniHtml;
+                const nodeGraph = document.getElementById('nodeGraph');
+                
+                if (filteredBranches.length === 0) {
+                    nodeGraph.innerHTML = '<div class="loading">No branches here yet. Plant one!</div>';
+                    return;
+                }
+                
+                filteredBranches.forEach((branch) => {
+                    const bData = branchMap[branch.id];
+                    const leafCount = bData ? bData.leaves.length : 0;
+                    
+                    const baseSize = 80;
+                    const size = Math.min(baseSize + (leafCount * 5), 250);
+                    
+                    const x = 10 + Math.random() * 70;
+                    const y = 10 + Math.random() * 70;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'branch-node';
+                    div.style.left = x + '%';
+                    div.style.top = y + '%';
+                    div.style.width = size + 'px';
+                    div.style.height = size + 'px';
+                    div.onclick = (e) => {
+                        if (e.target.closest('.sticking-leaf')) return;
+                        showBranchReadingView(branch.id, rootId);
+                    };
+                    
+                    const imgCount = bData ? bData.leaves.filter(l => l.media_urls && l.media_urls.length).length : 0;
+                    div.innerHTML = `
+                        <div class="branch-header">${branch.name}</div>
+                        <div class="branch-desc">${branch.description || ''}</div>
+                        <div style="font-size: 10px; opacity: 0.6;">${leafCount} leaves${imgCount ? ' 📷' + imgCount : ''}</div>
+                    `;
+                    
+                    if (bData) {
+                        const leafPreviewContainer = document.createElement('div');
+                        leafPreviewContainer.className = 'leaf-preview-container';
+                        
+                        const sortedLeaves = bData.leaves.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                        const recentLeaves = sortedLeaves.slice(0, 2);
+                        
+                        recentLeaves.forEach((leaf, lIndex) => {
+                            const sLeaf = document.createElement('div');
+                            sLeaf.className = 'sticking-leaf';
+                            const angle = (lIndex * 180) * (Math.PI / 180);
+                            const dist = size / 2 + 20;
+                            sLeaf.style.left = (size/2 + Math.cos(angle) * dist - 60) + 'px';
+                            sLeaf.style.top = (size/2 + Math.sin(angle) * dist - 15) + 'px';
+                            const imgIndicator = leaf.media_urls && leaf.media_urls.length ? ' 📷' : '';
+                            sLeaf.textContent = leaf.content.substring(0, 30) + '...' + imgIndicator;
+                            sLeaf.onclick = () => showBranchReadingView(branch.id, rootId);
+                            leafPreviewContainer.appendChild(sLeaf);
+                        });
+                        
+                        div.appendChild(leafPreviewContainer);
+                    }
+                    nodeGraph.appendChild(div);
+                });
+            });
+        }
+        
+        function showBranchReadingView(branchId, rootId) {
+            const rootView = document.getElementById('rootView');
+            rootView.innerHTML = '<div class="loading">Loading branch...</div>';
+            
+            Promise.all([
+                fetch(`${API}/branch/${branchId}`).then(r => r.json()),
+                fetch(`${API}/leaves/${rootId}`).then(r => r.json())
+            ]).then(([branch, allLeaves]) => {
+                const leaves = allLeaves.filter(l => l.branch === branchId && !l.is_deleted);
+                
+                let html = `
+                    <div class="tree-view">
+                        <div class="reading-view-header">
+                            <a href="#" onclick="showRoot('${rootId}')" style="color: currentColor; float: left;">[Back to Root]</a>
+                            <h2>${branch.name}</h2>
+                            <p>${branch.description || ''}</p>
+                            <button class="toggle-btn" onclick="toggleForm('newLeafForm')">[+ New Leaf]</button>
+                            <div class="compact-form" id="newLeafForm" style="max-width: 500px; margin: 10px auto;">
+                                <input type="text" id="authorName" placeholder="Name (optional)" value="Anonymous">
+                                <textarea id="leafContent" rows="4" placeholder="Drop your leaf..."></textarea>
+                                <input type="file" id="leafImageInput" accept="image/*" multiple style="margin:5px 0;width:100%;">
+                                <div id="leafImagePreview" style="display:flex;gap:5px;flex-wrap:wrap;margin:5px 0;"></div>
+                                <button class="btn" onclick="createNewLeaf('${rootId}', '${branchId}')">Drop Leaf</button>
+                            </div>
+                        </div>
+                        <div id="treeContainer"></div>
+                    </div>
+                `;
+                
+                rootView.innerHTML = html;
+                const treeContainer = document.getElementById('treeContainer');
+                
+                if (leaves.length === 0) {
+                    treeContainer.innerHTML = '<div class="loading">This branch is bare. Be the first leaf!</div>';
+                    return;
+                }
+                
+                // Build tree
+                const rootLeaves = leaves.filter(l => !l.parent_leaf_id);
+                const childrenMap = {};
+                leaves.forEach(l => {
+                    if (l.parent_leaf_id) {
+                        if (!childrenMap[l.parent_leaf_id]) childrenMap[l.parent_leaf_id] = [];
+                        childrenMap[l.parent_leaf_id].push(l);
+                    }
+                });
+                
+                function renderLeaf(leaf, depth = 0) {
+                    const children = childrenMap[leaf.id] || [];
+                    const date = new Date(leaf.created_at).toLocaleString();
+                    
+                    const images = (leaf.media_urls || []).map(url =>
+                        `<img src="${url}" loading="lazy" style="max-width:100%;max-height:300px;margin:5px 0;border:1px solid var(--border);">`
+                    ).join('');
+
+                    const seededUntil = leaf.seeded_until ? new Date(leaf.seeded_until + 'Z').getTime() : null;
+                    const now = Date.now();
+                    const expiresInSec = seededUntil ? Math.floor((seededUntil - now) / 1000) : null;
+                    let expiryHtml = '';
+                    if (seededUntil && expiresInSec > 0) {
+                        if (expiresInSec < 21600) {
+                            const h = Math.floor(expiresInSec / 3600);
+                            const m = Math.floor((expiresInSec % 3600) / 60);
+                            expiryHtml = `<span class="countdown-timer countdown-warning" data-seeded-until="${leaf.seeded_until}">⚠️ Expires in ${h}h ${m}m</span>`;
+                        } else {
+                            const h = Math.floor(expiresInSec / 3600);
+                            expiryHtml = `<span class="countdown-timer" data-seeded-until="${leaf.seeded_until}">🗂️ ${h}h</span>`;
+                        }
+                    } else if (seededUntil && expiresInSec <= 0) {
+                        expiryHtml = `<span class="countdown-timer countdown-expired">⚠️ Expired</span>`;
+                    }
+
+                    const legKey = 'moot_legendary_' + currentUser;
+                    let legData = {};
+                    try { legData = JSON.parse(localStorage.getItem(legKey) || '{}'); } catch(e) {}
+                    const isLegendary = legData[leaf.id];
+                    const legIcon = isLegendary ? '⭐' : '⚡';
+                    const legActive = isLegendary ? 'legendary-active' : '';
+
+                    let leafHtml = `
+                        <div class="tree-node" id="leaf-${leaf.id}">
+                            <div class="tree-node-content">
+                                <div class="tree-header">
+                                    <span><strong>${leaf.author_name || 'Anonymous'}</strong> @ ${date}</span>
+                                    <span>${leaf.id.substring(0, 8)}</span>
+                                </div>
+                                <div class="leaf-content">${leaf.content}</div>
+                                ${leaf.media_urls && leaf.media_urls.length ? `<div style="margin-top:8px;">${images}</div>` : ''}
+                                <div class="leaf-actions">
+                                    <a href="#" onclick="vote('upvote', '${leaf.id}', '${rootId}', '${branchId}')">[▲ ${leaf.upvotes}]</a>
+                                    <a href="#" onclick="vote('downvote', '${leaf.id}', '${rootId}', '${branchId}')">[▼ ${leaf.downvotes}]</a>
+                                    <span class="reply-btn" onclick="toggleForm('replyForm-${leaf.id}')">[+] Reply</span>
+                                    <a href="#" onclick="reportLeaf('${leaf.id}')" style="opacity:0.5;">[!]</a>
+                                    <a href="#" onclick="event.stopPropagation();promoteLegendary('${leaf.id}')" class="legendary-btn ${legActive}" id="leg-btn-${leaf.id}">[${legIcon}]</a>
+                                    ${expiryHtml}
+                                </div>
+                                <div class="compact-form" id="replyForm-${leaf.id}">
+                                    <input type="text" id="replyName-${leaf.id}" placeholder="Name" value="Anonymous">
+                                    <textarea id="replyContent-${leaf.id}" rows="2" placeholder="Write a reply..."></textarea>
+                                    <input type="file" id="replyImageInput-${leaf.id}" accept="image/*" multiple style="margin:5px 0;width:100%;">
+                                    <div id="replyImagePreview-${leaf.id}" style="display:flex;gap:5px;flex-wrap:wrap;margin:5px 0;"></div>
+                                    <button class="btn" onclick="replyToLeaf('${leaf.id}', '${rootId}', '${branchId}')">Drop Reply</button>
+                                </div>
+                            </div>
+                            <div class="tree-children">
+                                ${children.map(c => renderLeaf(c, depth + 1)).join('')}
+                            </div>
+                        </div>
+                    `;
+                    return leafHtml;
+                }
+                
+                treeContainer.innerHTML = rootLeaves.map(l => renderLeaf(l)).join('');
+                startCountdownTimers();
+            });
+        }
+        
+        function uploadImages(fileInput) {
+            const files = fileInput.files;
+            if (!files.length) return Promise.resolve([]);
+            const formData = new FormData();
+            for (const f of files) formData.append('images', f);
+            return fetch(`${API}/upload`, { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => data.urls || [])
+                .catch(() => []);
+        }
+
+        function setupImagePreview(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            if (!input || !preview) return;
+            input.addEventListener('change', function() {
+                preview.innerHTML = '';
+                for (const f of this.files) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.maxWidth = '80px';
+                        img.style.maxHeight = '80px';
+                        img.style.border = '1px solid var(--border)';
+                        preview.appendChild(img);
+                    };
+                    reader.readAsDataURL(f);
+                }
+            });
+        }
+
+        // Setup image previews after forms are created
+        const origToggleForm = toggleForm;
+        toggleForm = function(formId) {
+            origToggleForm(formId);
+            if (formId === 'newLeafForm') {
+                setupImagePreview('leafImageInput', 'leafImagePreview');
+            } else if (formId.startsWith('replyForm-')) {
+                const id = formId.replace('replyForm-', '');
+                setupImagePreview('replyImageInput-' + id, 'replyImagePreview-' + id);
+            }
+        };
+
+        function createNewLeaf(rootId, branchId) {
+            const content = document.getElementById('leafContent').value;
+            const authorName = document.getElementById('authorName').value || 'Anonymous';
+            if (!content) return alert('Write something first!');
+            
+            const fileInput = document.getElementById('leafImageInput');
+            uploadImages(fileInput).then(mediaUrls => {
+                fetch(`${API}/leaf/${currentUser}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        author_name: authorName,
+                        content: content,
+                        media_urls: mediaUrls,
+                        root: rootId,
+                        branch: branchId
+                    })
+                }).then(r => r.json())
+                  .then(data => {
+                      if (data.error) return alert(data.error);
+                      showBranchReadingView(branchId, rootId);
+                  });
+            });
+        }
+        
+        function toggleForm(formId) {
+            const form = document.getElementById(formId);
+            if (form) form.classList.toggle('show');
+        }
+        
+        function createBranch(rootId) {
+            const name = document.getElementById('branchName').value;
+            const desc = document.getElementById('branchDesc').value;
+            const trunkSelect = document.getElementById('branchTrunkSelect');
+            const trunkId = trunkSelect ? trunkSelect.value : null;
+            
+            if (!name) return alert('Enter a branch name!');
+            
+            fetch(`${API}/branch/${rootId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: name,
+                    description: desc,
+                    trunk_id: trunkId
+                })
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.error) return alert(data.error);
+                  alert('Branch created!');
+                  document.getElementById('branchForm').classList.remove('show');
+                  showRoot(rootId);
+              });
+        }
+
+        function createTrunk(rootId) {
+            const name = document.getElementById('trunkName').value;
+            const desc = document.getElementById('trunkDesc').value;
+            if (!name) return alert('Enter a trunk name!');
+            
+            fetch(`${API}/trunk/${rootId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: name,
+                    description: desc,
+                    created_by: currentUser
+                })
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.error) return alert(data.error);
+                  alert('Trunk created!');
+                  document.getElementById('trunkForm').classList.remove('show');
+                  showRoot(rootId);
+              });
+        }
+        
+        function replyToLeaf(leafId, rootId, branchId) {
+            const content = document.getElementById(`replyContent-${leafId}`).value;
+            const authorName = document.getElementById(`replyName-${leafId}`).value || 'Anonymous';
+            if (!content) return alert('Write something first!');
+            
+            const fileInput = document.getElementById(`replyImageInput-${leafId}`);
+            uploadImages(fileInput).then(mediaUrls => {
+                fetch(`${API}/leaf/${currentUser}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        author_name: authorName,
+                        content: content,
+                        media_urls: mediaUrls,
+                        root: rootId,
+                        branch: branchId,
+                        parent_leaf_id: leafId
+                    })
+                }).then(r => r.json())
+                  .then(data => {
+                      if (data.error) return alert(data.error);
+                      alert('Reply dropped!');
+                      showBranchReadingView(branchId, rootId);
+                  });
+            });
+        }
+        
+        function vote(type, leafId, rootId, branchId) {
+            const endpoint = type === 'upvote' ? 'upvote_leaf' : 'downvote_leaf';
+            fetch(`${API}/${endpoint}/${leafId}/${currentUser}`, { method: 'POST' })
+                .then(r => {
+                    if (!r.ok) throw new Error('Failed to vote');
+                    if (branchId) showBranchReadingView(branchId, rootId);
+                    else showRoot(rootId);
+                })
+                .catch(e => console.error(e));
+        }
+
+        function reportLeaf(leafId) {
+            const categories = [
+                {id:'Spam', label:'Spam [sev 1]', sev:1},
+                {id:'Misinformation', label:'Misinfo [sev 2]', sev:2},
+                {id:'NsfwUnmarked', label:'NSFW (unmarked) [sev 2]', sev:2},
+                {id:'Harassment', label:'Harassment [sev 3]', sev:3},
+                {id:'HateSpeech', label:'Hate Speech [sev 5]', sev:5},
+                {id:'IllegalContent', label:'Illegal Content [sev 5]', sev:5},
+            ];
+            const sel = categories.map((c,i) => `${i+1}) ${c.label}`).join('\n');
+            const choice = prompt(`[!] Report - pick category (costs 0.05 sway):\n${sel}`);
+            if (!choice) return;
+            const idx = parseInt(choice) - 1;
+            if (idx < 0 || idx >= categories.length) { alert('Invalid'); return; }
+            const cat = categories[idx];
+            fetch(`${API}/report`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    reporter_address: currentUser,
+                    target_type: 'Leaf',
+                    target_id: leafId,
+                    category: cat.id
+                })
+            }).then(r => r.json()).then(data => {
+                if (data.report_id) alert(`Report filed (${data.category}, sev ${data.severity}, threshold ${data.threshold})`);
+                else alert('Report failed: ' + (data.error || 'unknown'));
+            });
+        }
+        
+        function mirror(leafId, rootId) {
+            fetch(`${API}/mirror_leaf/${leafId}/${currentUser}`, {
+                method: 'POST'
+            }).then(() => alert('Mirrored!'));
+        }
+        
+        function showHollow() {
+            viewHollow(currentUser);
+        }
+
+        function viewHollow(address) {
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'none';
+            rootView.style.display = 'block';
+            rootView.innerHTML = '<div class="loading">Loading hollow...</div>';
+            
+            const isOwn = address === currentUser;
+            
+            fetch(`${API}/hollow/${address}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error === 'Hollow not found') {
+                        if (isOwn) {
+                            return fetch(`${API}/hollow/${address}`, {
+                                method: 'POST'
+                            }).then(r => r.json());
+                        }
+                        rootView.innerHTML = '<div class="content"><div class="status">Hollow not found</div></div>';
+                        return null;
+                    }
+                    return data;
+                })
+                .then(hollow => {
+                    if (!hollow) return;
+                    
+                    const displayName = hollow.display_name || address.substring(0, 10) + '...';
+                    let html = '<div class="content">';
+                    html += `<h2>🏠 ${isOwn ? 'My Hollow' : displayName + '\'s Hollow'}</h2>`;
+                    
+                    if (hollow.display_name) {
+                        html += `<h3 style="color:var(--accent);font-size:18px;">${hollow.display_name}</h3>`;
+                    }
+                    
+                    if (hollow.bio) {
+                        html += `<div class="hollow-bio">${hollow.bio}</div>`;
+                    }
+                    
+                    html += `<div class="status">`;
+                    html += `Owner: ${hollow.owner_address}<br>`;
+                    html += `Theme: ${hollow.settings.theme}<br>`;
+                    html += `Public: ${hollow.settings.is_public}`;
+                    if (hollow.friends && hollow.friends.length) {
+                        html += `<br>Friends: ${hollow.friends.length}`;
+                    }
+                    html += `</div>`;
+
+                    // Custom HTML (sandboxed)
+                    if (hollow.custom_html) {
+                        html += `<div class="hollow-html-box"><iframe sandbox="allow-scripts" id="hollow-sandbox-${address.substring(0,8)}" style="width:100%;min-height:200px;border:none;background:#fff;"></iframe></div>`;
+                    }
+
+                    // Music player
+                    if (hollow.music_url) {
+                        html += `<div class="hollow-player"><audio src="${hollow.music_url}" controls preload="none"></audio></div>`;
+                    }
+
+                    // Video embed
+                    if (hollow.video_embed) {
+                        html += `<div class="hollow-embed">${hollow.video_embed}</div>`;
+                    }
+
+                    // Social links
+                    if (hollow.social_links && hollow.social_links.length) {
+                        html += '<div style="margin:10px 0;font-size:12px;">';
+                        hollow.social_links.forEach(link => {
+                            html += `<a href="${link.url}" target="_blank" rel="noopener" style="color:var(--accent);margin-right:10px;">[${link.platform}]</a>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Private posts (only for own hollow or if public)
+                    if (hollow.private_posts && hollow.private_posts.length > 0 && (isOwn || hollow.settings.is_public)) {
+                        html += '<h3 style="margin-top:15px;">📝 Posts</h3>';
+                        hollow.private_posts.forEach(post => {
+                            if (post.is_public || isOwn) {
+                                html += `
+                                    <div class="leaf-full">
+                                        <div class="leaf-header">${new Date(post.created_at).toLocaleString()}</div>
+                                        <div class="leaf-content">${post.content}</div>
+                                    </div>
+                                `;
+                            }
+                        });
+                    }
+                    
+                    if (isOwn) {
+                        html += `
+                            <button class="toggle-btn" onclick="toggleForm('hollowPostForm')">[+ New Private Post]</button>
+                            <div class="compact-form" id="hollowPostForm">
+                                <textarea id="hollowPostContent" rows="3" placeholder="Write something private..."></textarea>
+                                <label style="font-size:12px;opacity:0.7;"><input type="checkbox" id="hollowPostPublic"> Public</label>
+                                <button class="btn" onclick="addHollowPost()">Add Post</button>
+                            </div>
+                        `;
+                    }
+                    
+                    // Friends section
+                    html += '<h3 style="margin-top:15px;">👥 Friends</h3>';
+                    if (hollow.friends && hollow.friends.length > 0) {
+                        html += '<div style="margin:5px 0;">';
+                        hollow.friends.forEach(friend => {
+                            const fShort = friend.substring(0, 10) + '...';
+                            html += `<span class="friend-chip" onclick="viewHollow('${friend}')">${fShort}</span>`;
+                        });
+                        html += '</div>';
+                    } else {
+                        html += '<div style="opacity:0.6;font-size:12px;padding:5px;">No friends yet.</div>';
+                    }
+                    
+                    if (isOwn) {
+                        html += `
+                            <button class="toggle-btn" onclick="toggleForm('addFriendForm')">[+ Add Friend]</button>
+                            <div class="compact-form" id="addFriendForm">
+                                <input type="text" id="friendAddress" placeholder="0x... friend address">
+                                <button class="btn" onclick="addFriend()">Add Friend</button>
+                            </div>
+                        `;
+                    }
+
+                    // Custom CSS (inline style tag, auto-removed on navigation)
+                    if (hollow.settings.custom_css && isOwn) {
+                        html += `<style id="hollow-custom-css">${hollow.settings.custom_css}</style>`;
+                    }
+                    
+                    // Settings editor (own hollow only)
+                    if (isOwn) {
+                        html += `
+                            <details class="settings-section">
+                                <summary>⚙️ Customize Hollow</summary>
+                                <label>Display Name: <input type="text" id="hDispName" value="${hollow.display_name || ''}" placeholder="Your display name"></label>
+                                <label>Bio: <textarea id="hBio" rows="2" placeholder="Tell about yourself">${hollow.bio || ''}</textarea></label>
+                                <label style="font-size:12px;"><input type="checkbox" id="hIsPublic" ${hollow.settings.is_public ? 'checked' : ''}> Public</label>
+                                <label>Theme: <select id="hTheme"><option value="default" ${hollow.settings.theme === 'default' ? 'selected' : ''}>Default</option><option value="dark" ${hollow.settings.theme === 'dark' ? 'selected' : ''}>Dark</option><option value="light" ${hollow.settings.theme === 'light' ? 'selected' : ''}>Light</option></select></label>
+                                <label>Font Size: <input type="text" id="hFontSize" value="${hollow.settings.font_size || ''}" placeholder="14px"></label>
+                                <label>Text Color: <input type="text" id="hTextColor" value="${hollow.settings.text_color || ''}" placeholder="#00ff00"></label>
+                                <label>Background Color: <input type="text" id="hBgColor" value="${hollow.settings.bg_color || ''}" placeholder="#1a1a1a"></label>
+                                <label>Animation: <input type="text" id="hAnimation" value="${hollow.settings.animation || ''}" placeholder="fadeIn"></label>
+                                <label>Custom CSS: <textarea id="hCustomCss" rows="4" placeholder=".my-class { color: red; }">${hollow.settings.custom_css || ''}</textarea></label>
+                                <label>Custom HTML: <textarea id="hCustomHtml" rows="4" placeholder="<p>Your custom HTML here</p>">${hollow.custom_html || ''}</textarea></label>
+                                <label>Music URL: <input type="text" id="hMusicUrl" value="${hollow.music_url || ''}" placeholder="https://example.com/song.mp3"></label>
+                                <label>Video Embed: <textarea id="hVideoEmbed" rows="2" placeholder="<iframe src='...'></iframe>">${hollow.video_embed || ''}</textarea></label>
+                                <button class="btn" onclick="saveHollowSettings()" style="margin-top:10px;">Save Settings</button>
+                            </details>
+                        `;
+                    }
+                    
+                    html += '<h3 style="margin-top:20px;">⭐ Legendary Leaves</h3>';
+                    html += '<div id="legendaryList"><div class="loading">Loading...</div></div>';
+
+                    // Comments section
+                    html += '<h3 style="margin-top:20px;">💬 Comments</h3>';
+                    html += '<div id="hollowComments"></div>';
+                    if (currentUser) {
+                        html += `
+                            <div style="margin-top:10px;padding:10px;border:1px dashed var(--border);">
+                                <textarea id="commentContent" rows="2" placeholder="Leave a public comment..." style="width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);padding:5px;font-family:'Courier New',monospace;font-size:13px;box-sizing:border-box;"></textarea>
+                                <button class="btn" onclick="addHollowComment('${address}')" style="margin-top:5px;">Post Comment</button>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>'; // Close content
+                    rootView.innerHTML = html;
+                    
+                    // Set sandboxed iframe content (avoids HTML escaping issues in inline srcdoc)
+                    if (hollow.custom_html) {
+                        const iframe = document.getElementById('hollow-sandbox-' + address.substring(0,8));
+                        if (iframe) {
+                            const doc = iframe.contentDocument || iframe.contentWindow.document;
+                            doc.open();
+                            doc.write(hollow.custom_html);
+                            doc.close();
+                        }
+                    }
+
+                    // Apply visual customizations
+                    if (isOwn) {
+                        applyHollowStyles(hollow);
+                    }
+                    
+                    // Fetch legendary entries
+                    if (isOwn) {
+                        fetch(`${API}/legendary?address=${currentUser}`)
+                            .then(r => r.json())
+                            .then(entries => {
+                                const list = document.getElementById('legendaryList');
+                                if (!entries || entries.length === 0) {
+                                    list.innerHTML = '<div style="opacity:0.6;font-size:12px;padding:10px;">No legendary leaves yet. ⚡ Promote leaves to save them forever.</div>';
+                                    return;
+                                }
+                                let legHtml = '';
+                                entries.forEach(e => {
+                                    const leaf = e.leaf_snapshot || {};
+                                    const date = leaf.created_at ? new Date(leaf.created_at).toLocaleString() : '';
+                                    const preview = leaf.content ? leaf.content.substring(0, 150) + (leaf.content.length > 150 ? '...' : '') : '(deleted)';
+                                    const branchInfo = leaf.branch ? ` in /${leaf.root}/` : '';
+                                    legHtml += '<div class="leaf-full" style="padding:8px;margin:5px 0;border:1px solid var(--border);font-size:12px;position:relative;">';
+                                    legHtml += '<div style="opacity:0.7;"><strong>' + (leaf.author_name || 'Anonymous') + '</strong>' + branchInfo + ' — ' + date + ' <span style="float:right;">⭐</span></div>';
+                                    legHtml += '<div style="margin-top:4px;">' + preview + '</div>';
+                                    legHtml += '<a href="#" onclick="event.stopPropagation();removeLegendary(\'' + e.leaf_id + '\')" style="position:absolute;top:4px;right:4px;opacity:0.5;font-size:11px;">[remove]</a>';
+                                    legHtml += '</div>';
+                                });
+                                list.innerHTML = legHtml;
+                            })
+                            .catch(() => {
+                                const list = document.getElementById('legendaryList');
+                                if (list) list.innerHTML = '<div style="opacity:0.6;font-size:12px;">Failed to load legendary entries.</div>';
+                            });
+                    } else {
+                        document.getElementById('legendaryList').innerHTML = '<div style="opacity:0.6;font-size:12px;padding:10px;">Legendary leaves are private.</div>';
+                    }
+                    
+                    // Fetch comments
+                    renderHollowComments(address, isOwn);
+                });
+        }
+
+        function renderHollowComments(address, isOwn) {
+            fetch(`${API}/hollow/${address}/comments`)
+                .then(r => r.json())
+                .then(data => {
+                    const container = document.getElementById('hollowComments');
+                    if (!container) return;
+                    const comments = data.comments || [];
+                    if (comments.length === 0) {
+                        container.innerHTML = '<div style="opacity:0.6;font-size:12px;padding:10px;">No comments yet.</div>';
+                        return;
+                    }
+                    let html = '';
+                    comments.forEach(c => {
+                        const date = new Date(c.created_at).toLocaleString();
+                        const authorShort = c.author_address.substring(0, 10) + '...';
+                        html += '<div class="hollow-comment">';
+                        if (isOwn) {
+                            html += `<span class="del-btn" onclick="deleteHollowComment('${address}','${c.id}')">[x]</span>`;
+                        }
+                        html += `<div class="meta">${authorShort} — ${date}</div>`;
+                        html += `<div>${c.content}</div>`;
+                        html += '</div>';
+                    });
+                    container.innerHTML = html;
+                })
+                .catch(() => {
+                    const container = document.getElementById('hollowComments');
+                    if (container) container.innerHTML = '<div style="opacity:0.6;font-size:12px;">Failed to load comments.</div>';
+                });
+        }
+
+        function addHollowComment(address) {
+            const content = document.getElementById('commentContent');
+            if (!content || !content.value.trim()) return;
+            fetch(`${API}/hollow/${address}/comment`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ author_address: currentUser, content: content.value.trim() }),
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) { alert(data.error); return; }
+                content.value = '';
+                renderHollowComments(address, currentUser === address);
+            })
+            .catch(e => console.error('Comment error:', e));
+        }
+
+        function deleteHollowComment(address, commentId) {
+            if (!confirm('Delete this comment?')) return;
+            fetch(`${API}/hollow/${address}/comment/${commentId}`, { method: 'DELETE' })
+                .then(r => r.json())
+                .then(() => renderHollowComments(address, true))
+                .catch(e => console.error('Delete comment error:', e));
+        }
+
+        function applyHollowStyles(hollow) {
+            if (hollow.settings.font_size) {
+                document.querySelector('.content').style.fontSize = hollow.settings.font_size;
+            }
+            if (hollow.settings.text_color) {
+                document.querySelector('.content').style.color = hollow.settings.text_color;
+            }
+            if (hollow.settings.bg_color) {
+                document.querySelector('.content').style.backgroundColor = hollow.settings.bg_color;
+            }
+            if (hollow.settings.animation) {
+                document.querySelector('.content').style.animation = hollow.settings.animation + ' 1s ease';
+            }
+        }
+
+        function saveHollowSettings() {
+            const settings = {
+                display_name: document.getElementById('hDispName').value || '',
+                bio: document.getElementById('hBio').value || '',
+                is_public: document.getElementById('hIsPublic').checked,
+                theme: document.getElementById('hTheme').value,
+                font_size: document.getElementById('hFontSize').value || '',
+                text_color: document.getElementById('hTextColor').value || '',
+                bg_color: document.getElementById('hBgColor').value || '',
+                animation: document.getElementById('hAnimation').value || '',
+                custom_css: document.getElementById('hCustomCss').value || '',
+                custom_html: document.getElementById('hCustomHtml').value || '',
+                music_url: document.getElementById('hMusicUrl').value || '',
+                video_embed: document.getElementById('hVideoEmbed').value || '',
+            };
+            fetch(`${API}/hollow/${currentUser}/settings`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(settings)
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.message) alert('✅ ' + data.message);
+                  else alert('Settings saved!');
+                  showHollow();
+              })
+              .catch(() => alert('Failed to save settings'));
+        }
+
+        function addFriend() {
+            const friendAddress = document.getElementById('friendAddress').value.trim();
+            if (!friendAddress || !friendAddress.startsWith('0x')) {
+                return alert('Enter a valid 0x address');
+            }
+            fetch(`${API}/hollow/${currentUser}/friend`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ friend_address: friendAddress })
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.message) alert('✅ ' + data.message);
+                  showHollow();
+              })
+              .catch(() => alert('Failed to add friend'));
+        }
+
+        function addHollowPost() {
+            const content = document.getElementById('hollowPostContent').value;
+            if (!content) return alert('Write something first!');
+            const isPublic = document.getElementById('hollowPostPublic') ? document.getElementById('hollowPostPublic').checked : false;
+            
+            fetch(`${API}/hollow/${currentUser}/post`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    content: content,
+                    is_public: isPublic
+                })
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.error) return alert(data.error);
+                  alert('Post added!');
+                  showHollow();
+              });
+        }
+        
+        function searchContent() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) return;
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'none';
+            rootView.style.display = 'block';
+            rootView.innerHTML = '<div class="loading">Searching...</div>';
+
+            fetch(`${API}/search?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(data => {
+                    let html = '<div class="content">';
+                    html += `<h2>🔍 Search: "${data.query}"</h2>`;
+                    html += `<div class="status">${data.total} results</div>`;
+
+                    if (data.roots && data.roots.length) {
+                        html += '<h3 style="margin-top:15px;">🌳 Roots</h3>';
+                        data.roots.forEach(r => {
+                            html += `<div class="leaf-full" style="padding:8px;margin:5px 0;border:1px solid var(--border);cursor:pointer;" onclick="showRoot('${r.id}')">
+                                <strong>${r.designator || r.name}</strong> — ${r.name}
+                            </div>`;
+                        });
+                    }
+
+                    if (data.branches && data.branches.length) {
+                        html += '<h3 style="margin-top:15px;">🌿 Branches</h3>';
+                        data.branches.forEach(b => {
+                            html += `<div class="leaf-full" style="padding:8px;margin:5px 0;border:1px solid var(--border);cursor:pointer;" onclick="showRoot('${b.root_id}')">
+                                <strong>${b.name}</strong> — ${b.description || ''}
+                            </div>`;
+                        });
+                    }
+
+                    if (data.leaves && data.leaves.length) {
+                        html += '<h3 style="margin-top:15px;">🍃 Leaves</h3>';
+                        data.leaves.slice(0, 50).forEach(l => {
+                            const preview = l.content.substring(0, 100) + (l.content.length > 100 ? '...' : '');
+                            html += `<div class="leaf-full" style="padding:8px;margin:5px 0;border:1px solid var(--border);font-size:12px;">
+                                <div style="opacity:0.7;"><strong>${l.author_name || 'Anonymous'}</strong> in /${l.root}/</div>
+                                <div>${preview}</div>
+                            </div>`;
+                        });
+                        if (data.leaves.length > 50) {
+                            html += `<div style="opacity:0.6;margin-top:5px;">...and ${data.leaves.length - 50} more</div>`;
+                        }
+                    }
+
+                    if (data.total === 0) {
+                        html += '<div class="loading" style="margin-top:20px;">Nothing found. Try different terms.</div>';
+                    }
+
+                    html += '</div>';
+                    rootView.innerHTML = html;
+                })
+                .catch(() => {
+                    rootView.innerHTML = '<div class="content"><div class="status">Search failed</div></div>';
+                });
+        }
+
+        function showSway() {
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'none';
+            rootView.style.display = 'block';
+            rootView.innerHTML = '<div class="loading">Loading sway...</div>';
+            
+            fetch(`${API}/sway/${currentUser}`)
+                .then(r => r.json())
+                .then(data => {
+                    let html = '<div class="content">';
+                    html += `
+                        <h2>⚖️ Your Sway</h2>
+                        <div class="status">
+                            <p>Address: ${data.address}</p>
+                            <p>Sway: ${data.sway ? data.sway.toFixed(2) : '0.00'}</p>
+                            <p><em>${data.message || 'Node runners are gods!'}</em></p>
+                        </div>
+                        <div class="leaf-full">
+                            <h3>How to Gain Sway</h3>
+                            <p>1. Host a node (run the Moot server)</p>
+                            <p>2. Serve content/bandwidth</p>
+                            <p>3. Stay online (uptime hours)</p>
+                            <p><strong>Node runners are gods!</strong></p>
+                        </div>
+                    `;
+                    html += '</div>'; // Close content
+                    rootView.innerHTML = html;
+                });
+        }
+        
+        // ── Content Lifecycle UI ──
+        
+        function showNodeConfig() {
+            const circleContainer = document.getElementById('circleContainer');
+            const rootView = document.getElementById('rootView');
+            circleContainer.style.display = 'none';
+            rootView.style.display = 'block';
+            rootView.innerHTML = '<div class="loading">Loading node config...</div>';
+            
+            fetch(`${API}/node/config`)
+                .then(r => r.json())
+                .then(config => {
+                    let html = '<div class="content">';
+                    html += '<h2>⚙️ Node Config</h2>';
+                    html += '<p style="opacity:0.7;font-size:12px;margin-bottom:15px;">Settings apply to THIS node only. Each node runner controls their own caching policy.</p>';
+                    
+                    // Cache warning
+                    const cacheBytes = config.cache_max_mb * 1024 * 1024;
+                    const legBytes = config.legendary_cache_max_mb * 1024 * 1024;
+                    html += '<div class="cache-warning">';
+                    html += '💾 Cache: <strong>' + config.cache_max_mb + ' MB</strong> | Legendary cache: <strong>' + config.legendary_cache_max_mb + ' MB</strong> | TTL: <strong>' + config.cache_ttl_days + ' days</strong> | Auto-seed: <strong>' + (config.auto_seed ? 'ON' : 'OFF') + '</strong>';
+                    html += '</div>';
+                    
+                    if (config.cache_max_mb > 2048) {
+                        html += '<div class="cache-warning" style="border-color:var(--text);">⚠️ Large cache size may impact disk usage. Keep an eye on <code>data/db/</code> directory.</div>';
+                    }
+                    
+                    html += '<div class="config-panel">';
+                    html += '<label>Cache TTL (days): <input type="number" id="cfgTtl" value="' + config.cache_ttl_days + '" min="1" max="365"></label>';
+                    html += '<label>Max Cache Size (MB): <input type="number" id="cfgCacheMb" value="' + config.cache_max_mb + '" min="64" max="65536"></label>';
+                    html += '<label>Legendary Cache Size (MB): <input type="number" id="cfgLegMb" value="' + config.legendary_cache_max_mb + '" min="64" max="65536"></label>';
+                    html += '<label>Auto-seed new content: <select id="cfgAutoSeed"><option value="true"' + (config.auto_seed ? ' selected' : '') + '>ON</option><option value="false"' + (!config.auto_seed ? ' selected' : '') + '>OFF</option></select></label>';
+                    html += '<button class="btn" onclick="saveNodeConfig()" style="margin-top:15px;">Save Config</button>';
+                    html += '</div>';
+                    html += '<div style="font-size:11px;opacity:0.6;margin-top:10px;padding:10px;">';
+                    html += '<strong>Legend:</strong> TTL = how long leaves live before eviction. Cache = max disk space for leaves. Legendary = space for ⭐-promoted leaves. Auto-seed = automatically seed content you interact with.';
+                    html += '</div>';
+                    html += '</div>';
+                    rootView.innerHTML = html;
+                })
+                .catch(() => {
+                    rootView.innerHTML = '<div class="content"><div class="status">Failed to load node config</div></div>';
+                });
+        }
+        
+        function saveNodeConfig() {
+            const config = {
+                cache_ttl_days: parseInt(document.getElementById('cfgTtl').value) || 7,
+                cache_max_mb: parseInt(document.getElementById('cfgCacheMb').value) || 1024,
+                legendary_cache_max_mb: parseInt(document.getElementById('cfgLegMb').value) || 512,
+                auto_seed: document.getElementById('cfgAutoSeed').value === 'true'
+            };
+            fetch(`${API}/node/config`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(config)
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.message) alert('✅ ' + data.message);
+                  else alert('Config saved!');
+                  showNodeConfig();
+              })
+              .catch(() => alert('Failed to save config'));
+        }
+        
+        function promoteLegendary(leafId) {
+            const btn = document.getElementById('leg-btn-' + leafId);
+            if (btn && btn.classList.contains('legendary-active')) {
+                // Already legendary, remove it
+                removeLegendary(leafId);
+                return;
+            }
+            
+            fetch(`${API}/legendary/promote/${leafId}?address=${currentUser}`, {
+                method: 'POST'
+            }).then(r => r.json())
+              .then(data => {
+                  if (data.message === 'Already legendary') {
+                      if (btn) { btn.innerHTML = '[⭐]'; btn.classList.add('legendary-active'); }
+                  } else if (data.message === 'Promoted to legendary') {
+                      if (btn) { btn.innerHTML = '[⭐]'; btn.classList.add('legendary-active'); }
+                      // Save to localStorage so we remember across views
+                      const legKey = 'moot_legendary_' + currentUser;
+                      let legData = {};
+                      try { legData = JSON.parse(localStorage.getItem(legKey) || '{}'); } catch(e) {}
+                      legData[leafId] = true;
+                      localStorage.setItem(legKey, JSON.stringify(legData));
+                  } else {
+                      alert('Failed: ' + (data.error || 'unknown'));
+                  }
+              })
+              .catch(() => alert('Failed to promote'));
+        }
+        
+        function removeLegendary(leafId) {
+            fetch(`${API}/legendary/remove/${leafId}?address=${currentUser}`, {
+                method: 'POST'
+            }).then(r => r.json())
+              .then(data => {
+                  const btn = document.getElementById('leg-btn-' + leafId);
+                  if (btn) { btn.innerHTML = '[⚡]'; btn.classList.remove('legendary-active'); }
+                  // Update localStorage
+                  const legKey = 'moot_legendary_' + currentUser;
+                  let legData = {};
+                  try { legData = JSON.parse(localStorage.getItem(legKey) || '{}'); } catch(e) {}
+                  delete legData[leafId];
+                  localStorage.setItem(legKey, JSON.stringify(legData));
+                  // If on hollow view, refresh
+                  const rootView = document.getElementById('rootView');
+                  if (rootView && rootView.querySelector('#legendaryList')) {
+                      showHollow();
+                  }
+              })
+              .catch(() => alert('Failed to remove'));
+        }
+        
+        function startCountdownTimers() {
+            setInterval(() => {
+                document.querySelectorAll('.countdown-timer[data-seeded-until]').forEach(el => {
+                    const until = el.getAttribute('data-seeded-until');
+                    if (!until) return;
+                    const expiresAt = new Date(until + 'Z').getTime();
+                    const now = Date.now();
+                    const diff = expiresAt - now;
+                    if (diff <= 0) {
+                        el.textContent = '⚠️ Expired';
+                        el.className = 'countdown-timer countdown-expired';
+                        return;
+                    }
+                    const totalSec = Math.floor(diff / 1000);
+                    const hours = Math.floor(totalSec / 3600);
+                    const minutes = Math.floor((totalSec % 3600) / 60);
+                    if (totalSec < 21600) {
+                        el.textContent = '⚠️ Expires in ' + hours + 'h ' + minutes + 'm';
+                        el.className = 'countdown-timer countdown-warning';
+                    } else {
+                        el.textContent = '🗂️ ' + hours + 'h';
+                        el.className = 'countdown-timer';
+                    }
+                });
+            }, 30000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+target/
+data/
+*.pid
+*.log
+static/uploads/*
+!static/uploads/.gitkeep
